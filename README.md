@@ -19,10 +19,10 @@ Useful for any simple games where you can utilize a 2d tile/sprite based simple 
 
 ### How to use
 - go to https://shoccho.github.io/tileMapCreator
-- Set the grid size and press ok to create a grid
+- Set the grid size
 - upload your tiles by dragging and dropping them on the left section
 - select an image
-- set the value for that tile 
+- set the value for that image (it will be the value in the actual map file)
 - start drawing 
 - click export when you're done
 
@@ -30,7 +30,7 @@ Useful for any simple games where you can utilize a 2d tile/sprite based simple 
 - <s>setting custom delimeter (by default it uses spaces)</s> ✓
 - <s> not needing to press ok to resize the map</s> ✓
 - <s> saving map state ( currently it only saves the images and the values so if you reload the map will be gone) </s> ✓
-- <s>custom file names ( currently it exports the map as map.txt) </s> ✓
+- <s>custom file names ( currently it exports the map as map.txt) </s>  ✓
 - ability to download the full map as an image/texture
 - custom attributes/flags (maybe, thats too much work)
 - minor ui updates
