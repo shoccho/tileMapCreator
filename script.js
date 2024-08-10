@@ -47,8 +47,18 @@ document.addEventListener('DOMContentLoaded', () => {
 		generateGrid(rows, cols, tileSize);
 	};
 
+	const loadImagesFromLocalStorage = () => {
+		return JSON.parse(localStorage.getItem('images') || '[]');
+	};
+
+	const loadSelectedImageFromLocalStorage = () => {
+		const data = localStorage.getItem('selectedImage');
+		if (!data) return undefined;
+		return JSON.parse(data);
+	};
+
 	const fillCellWithSelectedImage = (target) => {
-		const { src: selectedImage, value } = JSON.parse(localStorage.getItem('selectedImage'));
+		const { src: selectedImage, value } = loadSelectedImageFromLocalStorage() || {};
 		if (selectedImage) {
 			const id = target.id;
 			const ids = id.split('-')
@@ -99,16 +109,12 @@ document.addEventListener('DOMContentLoaded', () => {
 		toggleDndHint(images.length);
 	};
 
-	const loadImagesFromLocalStorage = () => {
-		return JSON.parse(localStorage.getItem('images') || '[]');
-	};
-
-	const loadSelectedImageFromLocalStorage = () => {
-		const selectedImage = JSON.parse(localStorage.getItem('selectedImage'));
+	const setSelectedImage =() =>{
+		const selectedImage = loadImagesFromLocalStorage();
 		document.querySelectorAll('.image-item img').forEach(img => {
 			img.style.border = img.src === selectedImage.src ? '3px solid blue' : '';
 		});
-	};
+	}
 
 	const createImageElement = (src, value) => {
 		const img = document.createElement('img');
@@ -121,8 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		input.value = value ?? null;
 		input.onchange = saveImagesToLocalStorage
 		img.addEventListener('click', () => {
-			localStorage.setItem('selectedImage', JSON.stringify({ src: img.src, value: input.value }));
-			loadSelectedImageFromLocalStorage();
+			localStorage.setItem('selectedImage', JSON.stringify({ src: img.src, value: input.value }));	
+			setSelectedImage();
 		});
 		const clearButton = document.createElement('button');
 		clearButton.textContent = 'x';
@@ -193,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	loadConfig();
 	loadMap();
 	generateImageGrid();
-	loadSelectedImageFromLocalStorage();
+	setSelectedImage()
 
 	dropZone.addEventListener('dragover', (event) => {
 		event.preventDefault();
@@ -261,7 +267,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		const fileName = fileNameInput.value;
 		let text = "";
 		mapData.forEach(row => {
-			row.forEach(cell => text += `${cell}${delimeter}`);
+			row.forEach(cell => {
+				const value = cell ? cell : ' '; //todo: better handle empty maps
+				text += `${value}${delimeter}`
+			});
 			text += '\n';
 		})
 		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
