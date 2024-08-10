@@ -93,20 +93,44 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 
+	let isDragging = false;
+	
 	gridContainer.addEventListener('click', (event) => {
-		if (event.target.classList.contains('cell')) {
-			const { src: selectedImage, value } = JSON.parse(localStorage.getItem('selectedImage'));
-			if (selectedImage) {
-				const id = event.target.id;
-				const ids = id.split('-')
-				const row = ids[0];
-				const col = ids[1];
-				table[row][col]= value;
-				event.target.style.backgroundImage = `url(${selectedImage})`;
-				event.target.style.backgroundSize = 'cover';
-			}
+		if (event.target.classList.contains('cell')) {	
+			fillCellWithSelectedImage(event.target);
 		}
 	});
+
+	gridContainer.addEventListener('mousedown', (event)=>{
+		isDragging = true;
+	});
+
+	gridContainer.addEventListener('mouseup', (event)=>{
+		isDragging = false;
+
+	});
+
+	gridContainer.addEventListener('mousemove', (event)=>{
+		if (event.target.classList.contains('cell')) {
+			if(isDragging) fillCellWithSelectedImage(event.target);
+		}
+	})
+	
+
+
+
+	const fillCellWithSelectedImage = (target) => {
+		const { src: selectedImage, value } = JSON.parse(localStorage.getItem('selectedImage'));
+		if (selectedImage) {
+			const id = target.id;
+			const ids = id.split('-')
+			const row = ids[0];
+			const col = ids[1];
+			table[row][col]= value;
+			target.style.backgroundImage = `url(${selectedImage})`;
+			target.style.backgroundSize = 'cover';
+		}
+	}
 
 	document.getElementById('export').addEventListener('click', () => {
 		let element = document.createElement('a');
