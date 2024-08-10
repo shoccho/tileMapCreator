@@ -72,8 +72,28 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 
-	gridContainer.addEventListener('click', (event) => {
+	const makeEmptyGrid = () => {
+		const rows = parseInt(document.getElementById('grid-y').value, 10);
+		const cols = parseInt(document.getElementById('grid-x').value, 10);
+		const tileSize = parseInt(document.getElementById('tile-size').value, 10);
 
+		if (isNaN(rows) || isNaN(cols) || isNaN(tileSize)) {
+			alert('Please enter valid numbers for grid dimensions and tile size.');
+			return;
+		}
+		table = makeMatrix(rows, cols);
+
+		generateGrid(rows, cols, tileSize);
+	};
+
+	const gridConfigContainer = document.getElementById("grid_config");
+	gridConfigContainer.addEventListener('click', (event)=>{
+		if(event.target.classList.contains('config')){
+			makeEmptyGrid();
+		}
+	});
+
+	gridContainer.addEventListener('click', (event) => {
 		if (event.target.classList.contains('cell')) {
 			const { src: selectedImage, value } = JSON.parse(localStorage.getItem('selectedImage'));
 			if (selectedImage) {
@@ -83,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				const col = ids[1];
 				table[row][col]= value;
 				event.target.style.backgroundImage = `url(${selectedImage})`;
-				event.target.style.backgroundSize = 'cover'; // Ensure the image covers the cell
+				event.target.style.backgroundSize = 'cover';
 			}
 		}
 	});
@@ -108,20 +128,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	const makeMatrix = (rows, cols) => new Array(cols).fill(0).map((o, i) => new Array(rows).fill(0));
 
-	document.getElementById('resize').addEventListener('click', () => {
-		const rows = parseInt(document.getElementById('grid-x').value, 10);
-		const cols = parseInt(document.getElementById('grid-y').value, 10);
-		const tileSize = parseInt(document.getElementById('tile-size').value, 10);
-
-		if (isNaN(rows) || isNaN(cols) || isNaN(tileSize)) {
-			alert('Please enter valid numbers for grid dimensions and tile size.');
-			return;
-		}
-		table = makeMatrix(rows, cols);
-
-		generateGrid(rows, cols, tileSize);
-	});
-
+	document.getElementById('resize').addEventListener('click', makeEmptyGrid )
+	
 	function generateGrid(rows, cols, tileSize) {
 		let table = `<div style="width:${tileSize * cols}px height:${tileSize * rows}px" class="table">`;
 		for (let r = 0; r < rows; r++) {
