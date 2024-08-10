@@ -149,8 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 
-
-
 	gridConfigContainer.addEventListener('click', (event) => {
 		if (event.target.classList.contains('config')) {
 			makeEmptyGrid();
