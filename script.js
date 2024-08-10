@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+	let table=[];
 
 	const dropZone = document.getElementById('drop-zone');
 	const imageList = document.getElementById('image-list');
@@ -20,8 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		event.preventDefault();
 		dropZone.style.backgroundColor = '';
 
-		console.log('Files dropped:', event.dataTransfer.files);
-
 		const files = event.dataTransfer.files;
 
 		if (files.length === 0) {
@@ -36,16 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
 					const img = document.createElement('img');
 					img.src = e.target.result;
 					img.draggable = false;
-
-					img.addEventListener('click', () => {
-						localStorage.setItem('selectedImage', img.src);
-						loadSelectedImageFromLocalStorage(); // Update UI to reflect the selected image
-					});
-
+				
 					const input = document.createElement('input');
 					input.type = 'text';
 					input.placeholder = 'Value';
-
+					input.onchange = saveImagesToLocalStorage	
+					img.addEventListener('click', () => {
+						localStorage.setItem('selectedImage', JSON.stringify({ src: img.src, value: input.value }));
+						loadSelectedImageFromLocalStorage();
+					});
 					const clearButton = document.createElement('button');
 					clearButton.textContent = 'x';
 					clearButton.classList.add('clear-button');
@@ -77,13 +75,38 @@ document.addEventListener('DOMContentLoaded', () => {
 	gridContainer.addEventListener('click', (event) => {
 
 		if (event.target.classList.contains('cell')) {
-			const selectedImage = localStorage.getItem('selectedImage');
+			const { src: selectedImage, value } = JSON.parse(localStorage.getItem('selectedImage'));
 			if (selectedImage) {
+				const id = event.target.id;
+				const ids = id.split('-')
+				const row = ids[0];
+				const col = ids[1];
+				table[row][col]= value;
 				event.target.style.backgroundImage = `url(${selectedImage})`;
 				event.target.style.backgroundSize = 'cover'; // Ensure the image covers the cell
 			}
 		}
 	});
+
+	document.getElementById('export').addEventListener('click', () => {
+		let element = document.createElement('a');
+		let text ="";
+		table.forEach(row=> {
+			row.forEach(cell=>text+=`${cell} `);
+			text+='\n';
+		})
+		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+		element.setAttribute('download', "map.txt");
+	  
+		element.style.display = 'none';
+		document.body.appendChild(element);
+	  
+		element.click();
+	  
+		document.body.removeChild(element);
+	});
+
+	const makeMatrix = (rows, cols) => new Array(cols).fill(0).map((o, i) => new Array(rows).fill(0));
 
 	document.getElementById('resize').addEventListener('click', () => {
 		const rows = parseInt(document.getElementById('grid-x').value, 10);
@@ -94,6 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			alert('Please enter valid numbers for grid dimensions and tile size.');
 			return;
 		}
+		table = makeMatrix(rows, cols);
+
 		generateGrid(rows, cols, tileSize);
 	});
 
@@ -102,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		for (let r = 0; r < rows; r++) {
 			table += '<div class="row">';
 			for (let c = 0; c < cols; c++) {
-				table += `<div class="cell" style="background:red; width:${tileSize}px; height:${tileSize}px;"></div>`;
+				table += `<div class="cell" id="${r}-${c}" style="width:${tileSize}px; height:${tileSize}px;"></div>`;
 			}
 			table += '</div>';
 		}
@@ -113,28 +138,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	function saveImagesToLocalStorage() {
 		const images = [];
-		document.querySelectorAll('.image-item img').forEach(img => {
-			images.push(img.src);
+		document.querySelectorAll('.image-item').forEach(imgItem => {
+			images.push({ src: imgItem.firstChild.src, value: imgItem.lastChild.firstChild.value } );
 		});
 		localStorage.setItem('images', JSON.stringify(images));
 	}
 
 	function loadImagesFromLocalStorage() {
 		const images = JSON.parse(localStorage.getItem('images') || '[]');
-		images.forEach(src => {
+		images.forEach(obj => {
 			const img = document.createElement('img');
-			img.src = src;
+			img.src = obj.src;
 			img.draggable = false;
-
-			img.addEventListener('click', () => {
-				localStorage.setItem('selectedImage', img.src);
-				loadSelectedImageFromLocalStorage(); // Update UI to reflect the selected image
-			});
 
 			const input = document.createElement('input');
 			input.type = 'text';
 			input.placeholder = 'Value';
+			input.value = obj.value;
 
+			img.addEventListener('click', () => {
+				localStorage.setItem('selectedImage', JSON.stringify({ src: img.src, value: input.value }));
+				loadSelectedImageFromLocalStorage();
+			});
 			const clearButton = document.createElement('button');
 			clearButton.textContent = 'x';
 			clearButton.classList.add('clear-button');
@@ -158,9 +183,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	function loadSelectedImageFromLocalStorage() {
-		const selectedImage = localStorage.getItem('selectedImage');
+		const selectedImage = JSON.parse(localStorage.getItem('selectedImage'));
 		document.querySelectorAll('.image-item img').forEach(img => {
-			img.style.border = img.src === selectedImage ? '3px solid blue' : '';
+			img.style.border = img.src === selectedImage.src ? '3px solid blue' : '';
 		});
 	}
 });
