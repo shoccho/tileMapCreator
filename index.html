@@ -10,21 +10,23 @@
     <div class="menu">
         <div id="grid_config">
             Grid size:
-            x <input type="number" min="1" max="100" value="10" class="slider config" id="grid-x">
-            y <input type="number" min="1" max="100" value="10" class="slider config" id="grid-y">
-            tile size (px)<input type="number" min="1" max="100" value="10" class="slider config" id="tile-size">
-            <button id="resize">Ok</button>
+            x <input type="number" min="1" max="100" value="10" class="config" id="grid-x">
+            y <input type="number" min="1" max="100" value="10" class="config" id="grid-y">
+            tile size (px)<input type="number" min="1" max="100" value="10" class="config" id="tile-size">
+            <button id="more-button">...</button>
+            <div id="more-options" style="visibility: collapse;">
+                Delimeter <input type="text" id="delimeter" value=" "> </input>
+                File Name <input type="text" id="file-name" value="map.txt"> </input>
+            </div>
             <button id="export">Export</button>
         </div>
     </div>
     <div class="main-container"> 
-        <div class="sidebar" id="sidebar">
-            <h2>Image Sidebar</h2>
-            <div id="drop-zone" style="border: 2px dashed #aaa; padding: 10px; margin-bottom: 10px;">
+        <div class="sidebar" id="drop-zone">
+            <div id="dnd-hint" style="border: 2px dashed #aaa; padding: 10px; margin-bottom: 10px;">
                 Drag & Drop Images Here
             </div>
             <div id="image-list">
-                <!-- Images will be added here -->
             </div>
         </div>
 

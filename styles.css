@@ -56,6 +56,12 @@ body {
         margin-left: 0.5rem;
         margin-right: 1rem;
     }
+    #more-options{
+        margin-left: 1rem;
+    }
+    #file-name{
+        width: 5rem;
+    }
 }
 td {
     border: 1px solid #ddd;
@@ -83,4 +89,12 @@ td {
 }
 .cell{
     border: 1px dashed #696969
+}
+
+/* wtf am i doing here */
+.visible{
+    visibility: visible;
+}
+.invisible{
+    visibility: collapse; 
 }

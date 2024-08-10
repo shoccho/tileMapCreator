@@ -6,6 +6,24 @@ document.addEventListener('DOMContentLoaded', () => {
 	const gridContainer = document.getElementById('grid-container');
 	const gridConfigContainer = document.getElementById("grid_config");
 	let isDragging = false;
+	let moreOptionsVisible = false;
+
+	const moreButton = document.getElementById('more-button');
+	const moreOptions = document.getElementById('more-options');
+
+	moreButton.onclick = () => {
+		moreOptions.setAttribute('style', `visibility: ${!moreOptionsVisible ? 'visible' : 'collapse'}`);
+		moreOptionsVisible =! moreOptionsVisible;
+	}
+	const dndHint = document.getElementById('dnd-hint');
+
+	const toggleDndHint = (imageCount) => {
+		if(imageCount === 0 ){
+			dndHint.setAttribute('class','visible');
+		}else{
+			dndHint.setAttribute('class','invisible');
+		}
+	}
 
 	const makeMatrix = (rows, cols) => new Array(cols).fill(0).map((o, i) => new Array(rows).fill(0));
 
@@ -56,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			images.push({ src: imgItem.firstChild.src, value: imgItem.lastChild.firstChild.value });
 		});
 		localStorage.setItem('images', JSON.stringify(images));
+		toggleDndHint(images.length);
 	};
 
 	const loadImagesFromLocalStorage = () => {
@@ -78,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		const input = document.createElement('input');
 		input.type = 'text';
 		input.placeholder = 'Value';
-		input.value = value;
+		input.value = value ?? null;
 		input.onchange = saveImagesToLocalStorage
 		img.addEventListener('click', () => {
 			localStorage.setItem('selectedImage', JSON.stringify({ src: img.src, value: input.value }));
@@ -110,6 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		images.forEach(obj => {
 			createImageElement(obj.src, obj.value);
 		});
+		toggleDndHint(images.length);
 	}
 
 	loadImagesFromLocalStorage();
@@ -177,13 +197,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	document.getElementById('export').addEventListener('click', () => {
 		let element = document.createElement('a');
+		const delimeter = document.getElementById('delimeter').value;
+		const fileName = document.getElementById('file-name').value;
 		let text = "";
 		table.forEach(row => {
-			row.forEach(cell => text += `${cell} `);
+			row.forEach(cell => text += `${cell}${delimeter}`);
 			text += '\n';
 		})
 		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-		element.setAttribute('download', "map.txt");
+		element.setAttribute('download', fileName);
 
 		element.style.display = 'none';
 		document.body.appendChild(element);

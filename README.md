@@ -27,10 +27,10 @@ Useful for any simple games where you can utilize a 2d tile/sprite based simple 
 - click export when you're done
 
 ### upcoming features ( hopefully )
-- setting custom delimeter (by default it uses spaces)
-- not needing to press ok to resize the map
+- <s>setting custom delimeter (by default it uses spaces)</s>
+- <s> not needing to press ok to resize the map</s>
 - saving map state ( currently it only saves the images and the values so if you reload the map will be gone)
-- custom file names ( currently it exports the map as map.txt)
+- <s>custom file names ( currently it exports the map as map.txt) </s>
 - ability to download the full map as an image/texture
 - custom attributes/flags (maybe, thats too much work)
 - minor ui updates
