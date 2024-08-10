@@ -173,11 +173,11 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	const loadConfig = () => {
-		gridX.value = localStorage.getItem('cols');
-		gridY.value = localStorage.getItem('rows');
-		gridScale.value = localStorage.getItem('scale');
-		delimeterInput.value = localStorage.getItem('delimeter');
-		fileNameInput.value = localStorage.getItem('fileName');
+		gridX.value = localStorage.getItem('cols') || 10;
+		gridY.value = localStorage.getItem('rows') || 10;
+		gridScale.value = localStorage.getItem('scale') || 32;
+		delimeterInput.value = localStorage.getItem('delimeter') || ' ';
+		fileNameInput.value = localStorage.getItem('fileName') || 'map.txt';
 	}
 
 	const loadMap = () => {
