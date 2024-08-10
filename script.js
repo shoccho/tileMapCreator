@@ -1,10 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
-	let table = [];
+	let mapData = [];
 
 	const dropZone = document.getElementById('drop-zone');
 	const imageList = document.getElementById('image-list');
 	const gridContainer = document.getElementById('grid-container');
 	const gridConfigContainer = document.getElementById("grid_config");
+	const gridY = document.getElementById('grid-y');
+	const gridX = document.getElementById('grid-x');
+	const gridScale = document.getElementById('tile-size');
+	const delimeterInput = document.getElementById('delimeter');
+	const fileNameInput = document.getElementById('file-name');
+
 	let isDragging = false;
 	let moreOptionsVisible = false;
 
@@ -25,18 +31,18 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 
-	const makeMatrix = (rows, cols) => new Array(cols).fill(0).map((o, i) => new Array(rows).fill(0));
+	const makeMatrix = (rows, cols) => mapData = new Array(cols).fill(0).map((o, i) => new Array(rows).fill(undefined));
 
 	const makeEmptyGrid = () => {
-		const rows = parseInt(document.getElementById('grid-y').value, 10);
-		const cols = parseInt(document.getElementById('grid-x').value, 10);
+		const rows = parseInt(gridY.value, 10);
+		const cols = parseInt(gridX.value, 10);
 		const tileSize = parseInt(document.getElementById('tile-size').value, 10);
 
 		if (isNaN(rows) || isNaN(cols) || isNaN(tileSize)) {
 			alert('Please enter valid numbers for grid dimensions and tile size.');
 			return;
 		}
-		table = makeMatrix(rows, cols);
+		mapData = makeMatrix(rows, cols);
 
 		generateGrid(rows, cols, tileSize);
 	};
@@ -48,24 +54,40 @@ document.addEventListener('DOMContentLoaded', () => {
 			const ids = id.split('-')
 			const row = ids[0];
 			const col = ids[1];
-			table[row][col] = value;
+			mapData[row][col] = value;
 			target.style.backgroundImage = `url(${selectedImage})`;
 			target.style.backgroundSize = 'cover';
 		}
+		saveMap();
 	};
 
-	const generateGrid = (rows, cols, tileSize) => {
-		let table = `<div style="width:${tileSize * cols}px height:${tileSize * rows}px" class="table">`;
-		for (let r = 0; r < rows; r++) {
-			table += '<div class="row">';
-			for (let c = 0; c < cols; c++) {
-				table += `<div class="cell" id="${r}-${c}" style="width:${tileSize}px; height:${tileSize}px;"></div>`;
-			}
-			table += '</div>';
+	const getImageIfAvaliable = (row, column) => {
+		const value = mapData?.[row]?.[column];
+		if (value){
+			const images = loadImagesFromLocalStorage(); //todo: maybe have a hashmap when images are loaded for the grid
+			return images.find( image => image.value == value)?.src;
 		}
-		table += '</div>';
+	}
 
-		gridContainer.innerHTML = table;
+	const generateGrid = () => {
+		const rows = gridY.value;
+		const cols = gridX.value;
+		const tileSize = gridScale.value;
+
+		if(mapData == undefined) makeMatrix(rows, cols);
+		let mapGrid = `<div style="width:${tileSize * cols}px height:${tileSize * rows}px" class="table">`;
+		for (let r = 0; r < rows; r++) {
+			mapGrid += '<div class="row">';
+			for (let c = 0; c < cols; c++) {
+				const imageSrc = getImageIfAvaliable(r,c);
+				const imageStyle = imageSrc ? `background-image: url(${imageSrc}); background-size: cover;` : '';
+				mapGrid += `<div class="cell" id="${r}-${c}" style="width:${tileSize}px; height:${tileSize}px; ${imageStyle}"></div>`;
+			}
+			mapGrid += '</div>';
+		}
+		mapGrid += '</div>';
+
+		gridContainer.innerHTML = mapGrid;
 	}
 
 	const saveImagesToLocalStorage = () => {
@@ -78,8 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	};
 
 	const loadImagesFromLocalStorage = () => {
-		const images = JSON.parse(localStorage.getItem('images') || '[]');
-		generateImageGrid(images);
+		return JSON.parse(localStorage.getItem('images') || '[]');
 	};
 
 	const loadSelectedImageFromLocalStorage = () => {
@@ -125,16 +146,54 @@ document.addEventListener('DOMContentLoaded', () => {
 		saveImagesToLocalStorage();
 	};
 
-	const generateImageGrid = (images) => {
+	const generateImageGrid = () => {
+		const images = loadImagesFromLocalStorage();
 		images.forEach(obj => {
 			createImageElement(obj.src, obj.value);
 		});
 		toggleDndHint(images.length);
 	}
+	
+	const saveConfig = () =>{
+		const rows = gridY.value;
+		const cols = gridX.value;
+		const scale = gridScale.value;
+		const delimeter = delimeterInput.value;
+		const fileName = fileNameInput.value;
 
-	loadImagesFromLocalStorage();
+		localStorage.setItem('rows', rows);
+		localStorage.setItem('cols', cols);
+		localStorage.setItem('scale', scale);
+		localStorage.setItem('delimeter', delimeter);
+		localStorage.setItem('fileName', fileName);
+	}
+
+	const saveMap = () => {
+		localStorage.setItem('mapData', JSON.stringify(mapData));
+	}
+
+	const loadConfig = () => {
+		gridX.value = localStorage.getItem('cols');
+		gridY.value = localStorage.getItem('rows');
+		gridScale.value = localStorage.getItem('scale');
+		delimeterInput.value = localStorage.getItem('delimeter');
+		fileNameInput.value = localStorage.getItem('fileName');
+	}
+
+	const loadMap = () => {
+		const data = JSON.parse(localStorage.getItem('mapData'));
+		if (!data){
+			makeEmptyGrid();
+		}else{
+			mapData = data;
+			generateGrid();
+		}
+	}
+
+	loadConfig();
+	loadMap();
+	generateImageGrid();
 	loadSelectedImageFromLocalStorage();
-	makeEmptyGrid();
 
 	dropZone.addEventListener('dragover', (event) => {
 		event.preventDefault();
@@ -171,7 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	gridConfigContainer.addEventListener('click', (event) => {
 		if (event.target.classList.contains('config')) {
-			makeEmptyGrid();
+			saveConfig();
+			generateGrid();
 		}
 	});
 
@@ -197,10 +257,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	document.getElementById('export').addEventListener('click', () => {
 		let element = document.createElement('a');
-		const delimeter = document.getElementById('delimeter').value;
-		const fileName = document.getElementById('file-name').value;
+		const delimeter = delimeterInput.value;
+		const fileName = fileNameInput.value;
 		let text = "";
-		table.forEach(row => {
+		mapData.forEach(row => {
 			row.forEach(cell => text += `${cell}${delimeter}`);
 			text += '\n';
 		})
