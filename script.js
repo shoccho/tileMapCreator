@@ -117,8 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	})
 	
 
-
-
 	const fillCellWithSelectedImage = (target) => {
 		const { src: selectedImage, value } = JSON.parse(localStorage.getItem('selectedImage'));
 		if (selectedImage) {
