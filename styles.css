@@ -87,10 +87,10 @@ td {
 	display: flex;
 	flex-direction: row;
 }
-.cell{
-    border: 1px dashed #696969
-}
 
+.bordered{
+    border: 1px dashed #696969;
+}
 /* wtf am i doing here */
 .visible{
     visibility: visible;

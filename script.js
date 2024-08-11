@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const gridScale = document.getElementById('tile-size');
 	const delimeterInput = document.getElementById('delimeter');
 	const fileNameInput = document.getElementById('file-name');
+	const showGridInput = document.getElementById('show-grid');
 
 	let isDragging = false;
 	let moreOptionsVisible = false;
@@ -102,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			for (let c = 0; c < cols; c++) {
 				const imageSrc = getImageIfAvaliable(r, c);
 				const imageStyle = imageSrc ? `background-image: url(${imageSrc}); background-size: cover;` : '';
-				mapGrid += `<div class="cell" id="${r}-${c}" style="width:${tileSize}px; height:${tileSize}px; ${imageStyle}"></div>`;
+				mapGrid += `<div class="cell ${showGridInput.checked ? 'bordered' : ''}" id="${r}-${c}" style="width:${tileSize}px; height:${tileSize}px; ${imageStyle}"></div>`;
 			}
 			mapGrid += '</div>';
 		}
@@ -123,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const setSelectedImage = () => {
 		const selectedImage = loadImagesFromLocalStorage();
 		document.querySelectorAll('.image-item img').forEach(img => {
+			console.log(img)
 			img.style.border = img.src === selectedImage.src ? '3px solid blue' : '';
 		});
 	}
@@ -177,12 +179,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		const scale = gridScale.value;
 		const delimeter = delimeterInput.value;
 		const fileName = fileNameInput.value;
+		const showGrid = showGridInput.checked;
 
 		localStorage.setItem('rows', rows);
 		localStorage.setItem('cols', cols);
 		localStorage.setItem('scale', scale);
 		localStorage.setItem('delimeter', delimeter);
 		localStorage.setItem('fileName', fileName);
+		localStorage.setItem('showGrid', showGrid);
 	}
 
 	const saveMap = () => {
@@ -195,6 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		gridScale.value = localStorage.getItem('scale') || 32;
 		delimeterInput.value = localStorage.getItem('delimeter') || ' ';
 		fileNameInput.value = localStorage.getItem('fileName') || 'map.txt';
+		showGridInput.checked = localStorage.getItem('showGrid') || true;
+		
 	}
 
 	const loadMap = () => {
@@ -206,6 +212,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			generateGrid();
 		}
 	}
+
+	showGridInput.addEventListener('click', (event) => {
+		generateGrid();
+	})
 
 	loadConfig();
 	loadMap();
