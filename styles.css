@@ -63,11 +63,7 @@ body {
         width: 5rem;
     }
 }
-td {
-    border: 1px solid #ddd;
-    text-align: center;
-    vertical-align: middle;
-}
+
 .menu {
     background-color: #f4f4f4;
     padding: 10px;
@@ -92,9 +88,6 @@ td {
     border: 1px dashed #696969;
 }
 /* wtf am i doing here */
-.visible{
-    visibility: visible;
-}
 .invisible{
-    visibility: collapse; 
+    display: none;
 }
