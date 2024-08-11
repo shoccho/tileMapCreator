@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const delimeterInput = document.getElementById('delimeter');
 	const fileNameInput = document.getElementById('file-name');
 	const showGridInput = document.getElementById('show-grid');
+	const clearMapButton = document.getElementById('clear-map');
 
 	let isDragging = false;
 	let moreOptionsVisible = false;
@@ -44,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			return;
 		}
 		mapData = makeMatrix(rows, cols);
-
+		saveMap()
 		generateGrid(rows, cols, tileSize);
 	};
 
@@ -219,7 +220,12 @@ document.addEventListener('DOMContentLoaded', () => {
 	loadConfig();
 	loadMap();
 	generateImageGrid();
-	setSelectedImage()
+	setSelectedImage();
+	
+	clearMapButton.addEventListener('click', () => {
+		mapData = [];
+		makeEmptyGrid();
+	})
 
 	dropZone.addEventListener('dragover', (event) => {
 		event.preventDefault();

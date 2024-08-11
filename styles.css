@@ -62,6 +62,9 @@ body {
     #file-name{
         width: 5rem;
     }
+    button{
+        margin-right: 1rem;
+    }
 }
 
 .menu {
