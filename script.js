@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			for (let c = 0; c < cols; c++) {
 				const imageSrc = getImageIfAvaliable(r, c);
 				const imageStyle = imageSrc ? `background-image: url(${imageSrc}); background-size: cover;` : '';
-				mapGrid += `<div class="cell ${showGridInput.checked ? 'bordered' : ''}" id="${r}-${c}" style="width:${tileSize}px; height:${tileSize}px; ${imageStyle}"></div>`;
+				mapGrid += `<div class="cell ${showGridInput.checked ? 'bordered' : ''}" id="${r}-${c}" style="width:${tileSize}px; height:${tileSize}px; ${imageStyle}" title="${r}-${c}" ></div>`;
 			}
 			mapGrid += '</div>';
 		}
