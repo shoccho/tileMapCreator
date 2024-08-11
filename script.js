@@ -19,15 +19,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	moreButton.onclick = () => {
 		moreOptions.setAttribute('style', `visibility: ${!moreOptionsVisible ? 'visible' : 'collapse'}`);
-		moreOptionsVisible =! moreOptionsVisible;
+		moreOptionsVisible = !moreOptionsVisible;
 	}
 	const dndHint = document.getElementById('dnd-hint');
 
 	const toggleDndHint = (imageCount) => {
-		if(imageCount === 0 ){
-			dndHint.setAttribute('class','visible');
-		}else{
-			dndHint.setAttribute('class','invisible');
+		if (imageCount === 0) {
+			dndHint.setAttribute('class', 'visible');
+		} else {
+			dndHint.setAttribute('class', 'invisible');
 		}
 	}
 
@@ -73,9 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	const getImageIfAvaliable = (row, column) => {
 		const value = mapData?.[row]?.[column];
-		if (value){
+		if (value) {
 			const images = loadImagesFromLocalStorage(); //todo: maybe have a hashmap when images are loaded for the grid
-			return images.find( image => image.value == value)?.src;
+			return images.find(image => image.value == value)?.src;
 		}
 	}
 
@@ -84,12 +84,24 @@ document.addEventListener('DOMContentLoaded', () => {
 		const cols = gridX.value;
 		const tileSize = gridScale.value;
 
-		if(mapData == undefined) makeMatrix(rows, cols);
+		if (mapData == undefined) {
+			makeMatrix(rows, cols);
+		} else if (mapData.length != rows || mapData?.[0].length != cols) {
+			//resize map
+			let newMapData = Array.from({ length: rows }, () => Array(cols).fill(undefined));
+
+			for (let i = 0; i < Math.min(mapData.length, rows); i++) {
+				for (let j = 0; j < Math.min(mapData?.[0].length, cols); j++) {
+					newMapData[i][j] = mapData[i][j];
+				}
+			}
+			mapData = newMapData
+		}
 		let mapGrid = `<div style="width:${tileSize * cols}px height:${tileSize * rows}px" class="table">`;
 		for (let r = 0; r < rows; r++) {
 			mapGrid += '<div class="row">';
 			for (let c = 0; c < cols; c++) {
-				const imageSrc = getImageIfAvaliable(r,c);
+				const imageSrc = getImageIfAvaliable(r, c);
 				const imageStyle = imageSrc ? `background-image: url(${imageSrc}); background-size: cover;` : '';
 				mapGrid += `<div class="cell" id="${r}-${c}" style="width:${tileSize}px; height:${tileSize}px; ${imageStyle}"></div>`;
 			}
@@ -109,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		toggleDndHint(images.length);
 	};
 
-	const setSelectedImage =() =>{
+	const setSelectedImage = () => {
 		const selectedImage = loadImagesFromLocalStorage();
 		document.querySelectorAll('.image-item img').forEach(img => {
 			img.style.border = img.src === selectedImage.src ? '3px solid blue' : '';
@@ -127,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		input.value = value ?? null;
 		input.onchange = saveImagesToLocalStorage
 		img.addEventListener('click', () => {
-			localStorage.setItem('selectedImage', JSON.stringify({ src: img.src, value: input.value }));	
+			localStorage.setItem('selectedImage', JSON.stringify({ src: img.src, value: input.value }));
 			setSelectedImage();
 		});
 		const clearButton = document.createElement('button');
@@ -159,8 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 		toggleDndHint(images.length);
 	}
-	
-	const saveConfig = () =>{
+
+	const saveConfig = () => {
 		const rows = gridY.value;
 		const cols = gridX.value;
 		const scale = gridScale.value;
@@ -188,9 +200,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	const loadMap = () => {
 		const data = JSON.parse(localStorage.getItem('mapData'));
-		if (!data){
+		if (!data) {
 			makeEmptyGrid();
-		}else{
+		} else {
 			mapData = data;
 			generateGrid();
 		}
