@@ -122,9 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	};
 
 	const setSelectedImage = () => {
-		const selectedImage = loadImagesFromLocalStorage();
+		const selectedImage = loadSelectedImageFromLocalStorage();
 		document.querySelectorAll('.image-item img').forEach(img => {
-			console.log(img)
 			img.style.border = img.src === selectedImage.src ? '3px solid blue' : '';
 		});
 	}
