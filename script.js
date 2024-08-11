@@ -87,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (mapData == undefined) {
 			makeMatrix(rows, cols);
 		} else if (mapData.length != rows || mapData?.[0].length != cols) {
-			//resize map
 			let newMapData = Array.from({ length: rows }, () => Array(cols).fill(undefined));
 
 			for (let i = 0; i < Math.min(mapData.length, rows); i++) {
@@ -264,6 +263,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	gridContainer.addEventListener('mouseup', (event) => {
+		isDragging = false;
+	});
+
+	gridContainer.addEventListener('mouseleave', (event) => {
 		isDragging = false;
 	});
 
