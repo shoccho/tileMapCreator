@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	let isDragging = false;
 	let moreOptionsVisible = false;
+	let rightDrag = false;
 
 	const moreButton = document.getElementById('more-button');
 	const moreOptions = document.getElementById('more-options');
@@ -73,6 +74,16 @@ document.addEventListener('DOMContentLoaded', () => {
 		saveMap();
 	};
 
+	const removeCell = (target) => {
+		const id = target.id;
+		const ids = id.split('-')
+		const row = ids[0];
+		const col = ids[1];
+		mapData[row][col] = null;
+		target.style.backgroundImage = null;
+		saveMap();
+	}
+
 	const getImageIfAvaliable = (row, column) => {
 		const value = mapData?.[row]?.[column];
 		if (value) {
@@ -104,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			for (let c = 0; c < cols; c++) {
 				const imageSrc = getImageIfAvaliable(r, c);
 				const imageStyle = imageSrc ? `background-image: url(${imageSrc}); background-size: cover;` : '';
-				mapGrid += `<div class="cell ${showGridInput.checked ? 'bordered' : ''}" id="${r}-${c}" style="width:${tileSize}px; height:${tileSize}px; ${imageStyle}" title="${r}-${c}" ></div>`;
+				mapGrid += `<div class="cell ${showGridInput.checked ? 'bordered' : ''}" id="${r}-${c}" style="width:${tileSize}px; height:${tileSize}px; ${imageStyle}" title="${c}-${r}" ></div>`;
 			}
 			mapGrid += '</div>';
 		}
@@ -267,27 +278,44 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 
+	gridContainer.addEventListener('contextmenu', event => {
+		event.preventDefault()
+		if (event.target.classList.contains('cell')) {
+			removeCell(event.target);
+		}
+	});
+
 	gridContainer.addEventListener('click', (event) => {
 		if (event.target.classList.contains('cell')) {
+			console.log(event)
 			fillCellWithSelectedImage(event.target);
 		}
 	});
 
 	gridContainer.addEventListener('mousedown', (event) => {
 		isDragging = true;
+		rightDrag = event.buttons === 2;
 	});
 
 	gridContainer.addEventListener('mouseup', (event) => {
 		isDragging = false;
+		rightDrag = false;
 	});
 
 	gridContainer.addEventListener('mouseleave', (event) => {
 		isDragging = false;
+		rightDrag = false;
 	});
 
 	gridContainer.addEventListener('mousemove', (event) => {
 		if (event.target.classList.contains('cell')) {
-			if (isDragging) fillCellWithSelectedImage(event.target);
+			if (isDragging) {
+				if(rightDrag){
+					removeCell(event.target);
+				}else{
+					fillCellWithSelectedImage(event.target);
+				}
+			}
 		}
 	});
 
