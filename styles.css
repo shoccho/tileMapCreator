@@ -65,6 +65,10 @@ body {
     button{
         margin-right: 1rem;
     }
+    button.pressed{
+        background-color: #8f8f8f;
+        transform: translateY(1px);    
+    }
 }
 
 .menu {

@@ -12,10 +12,19 @@ document.addEventListener('DOMContentLoaded', () => {
 	const fileNameInput = document.getElementById('file-name');
 	const showGridInput = document.getElementById('show-grid');
 	const clearMapButton = document.getElementById('clear-map');
+	const penToolButton = document.getElementById('pen-button');
+	const bucketToolButton = document.getElementById('bucket-button');
+
 
 	let isDragging = false;
 	let moreOptionsVisible = false;
 	let rightDrag = false;
+	let bucketSelected = false;
+
+	//hack ? everything here is a hack
+
+	let currentTarget = null;
+	let selectedImageObj = null;
 
 	const moreButton = document.getElementById('more-button');
 	const moreOptions = document.getElementById('more-options');
@@ -59,28 +68,64 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (!data) return undefined;
 		return JSON.parse(data);
 	};
+	
+	function isValid(row, col, targetValue) {
+		return row >= 0 && row < parseInt(gridY.value) &&
+			   col >= 0 && col < parseInt(gridX.value) &&
+			   mapData[row][col] === targetValue
+	}
 
-	const fillCellWithSelectedImage = (target) => {
-		const { src: selectedImage, value } = loadSelectedImageFromLocalStorage() || {};
-		if (selectedImage) {
-			const id = target.id;
-			const ids = id.split('-')
-			const row = ids[0];
-			const col = ids[1];
-			mapData[row][col] = value;
-			target.style.backgroundImage = `url(${selectedImage})`;
-			target.style.backgroundSize = 'cover';
-		}
-		saveMap();
-	};
-
-	const removeCell = (target) => {
+	const getCellPosition = (target) => {
 		const id = target.id;
 		const ids = id.split('-')
-		const row = ids[0];
-		const col = ids[1];
+		const row = parseInt(ids[0]);
+		const col = parseInt(ids[1]);
+		return {row, col}
+	}
+
+	const floodFillCells = () => {
+		const pos = getCellPosition(currentTarget);
+		floodFillWithImage(pos, selectedImageObj)
+		saveMap();
+	}
+
+	const floodFillWithImage = ({row: startRow, col: startCol}) =>{
+		
+		const oldValue = mapData[startRow][startCol];
+
+		if (oldValue === selectedImageObj.value) return;	
+		const stack = [[startRow, startCol]];
+		while (stack.length > 0) {
+			const [row, col] = stack.pop();	
+			if (!isValid(parseInt(row), parseInt(col), oldValue)) continue;
+			fillWithSelectedImage({row, col});
+
+			stack.push([row + 1, col]);
+			stack.push([row - 1, col]);
+			stack.push([row, col + 1]);
+			stack.push([row, col - 1]);
+		}
+	}
+
+	const fillSingelCell = () => {
+		const pos = getCellPosition(currentTarget);
+		fillWithSelectedImage(pos);
+		saveMap();
+	}
+
+	const fillWithSelectedImage = ({row, col}) => {
+		if (selectedImageObj) {
+			mapData[row][col] = selectedImageObj.value;
+			const cell = document.getElementById(`${row}-${col}`);
+			cell.style.backgroundImage = `url(${selectedImageObj.src})`;
+			cell.style.backgroundSize = 'cover';
+		}
+	};
+
+	const removeCell = () => {
+		const {row, col} = getCellPosition(currentTarget);
 		mapData[row][col] = null;
-		target.style.backgroundImage = null;
+		currentTarget.style.backgroundImage = null;
 		saveMap();
 	}
 
@@ -135,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	const setSelectedImage = () => {
 		const selectedImage = loadSelectedImageFromLocalStorage();
+		selectedImageObj = selectedImage;
 		document.querySelectorAll('.image-item img').forEach(img => {
 			img.style.border = img.src === selectedImage.src ? '3px solid blue' : '';
 		});
@@ -224,6 +270,18 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 
+	penToolButton.addEventListener('click', (event) => {
+		bucketSelected = false;
+		penToolButton.classList.add('pressed');
+		bucketToolButton.classList.remove('pressed');
+	});
+
+	bucketToolButton.addEventListener('click', (event) => {
+		bucketSelected = true;
+		bucketToolButton.classList.add('pressed');
+		penToolButton.classList.remove('pressed');
+	});
+
 	showGridInput.addEventListener('click', (event) => {
 		generateGrid();
 	})
@@ -232,7 +290,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	loadMap();
 	generateImageGrid();
 	setSelectedImage();
-	
+
+	penToolButton.classList.add('pressed');
+
 	clearMapButton.addEventListener('click', () => {
 		mapData = [];
 		makeEmptyGrid();
@@ -279,16 +339,21 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	gridContainer.addEventListener('contextmenu', event => {
-		event.preventDefault()
+		event.preventDefault();
 		if (event.target.classList.contains('cell')) {
-			removeCell(event.target);
+			currentTarget = event.target;
+			removeCell();
 		}
 	});
 
 	gridContainer.addEventListener('click', (event) => {
 		if (event.target.classList.contains('cell')) {
-			console.log(event)
-			fillCellWithSelectedImage(event.target);
+			currentTarget = event.target;
+			if(bucketSelected) {
+				floodFillCells();
+			}else{
+				fillSingelCell();
+			}
 		}
 	});
 
@@ -310,10 +375,11 @@ document.addEventListener('DOMContentLoaded', () => {
 	gridContainer.addEventListener('mousemove', (event) => {
 		if (event.target.classList.contains('cell')) {
 			if (isDragging) {
+				currentTarget = event.target;
 				if(rightDrag){
-					removeCell(event.target);
+					removeCell();
 				}else{
-					fillCellWithSelectedImage(event.target);
+					fillSingelCell();
 				}
 			}
 		}
